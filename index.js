@@ -24,11 +24,12 @@ async function run() {
   try {
     await client.connect();
     const productCollection = client.db("cycle_ghor").collection("products");
+    const orderCollection = client.db("cycle_ghor").collection("orders");
     
     app.get("/", (req, res) => {
       res.send("port a kiu paowa jaitese");
     });
-
+    //Get API--------------
     app.get("/products", async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
@@ -41,17 +42,30 @@ async function run() {
       const result = await productCollection.findOne(query);
       res.send(result);
     });
-    app.delete("/products/:id", async (req, res) => {
-      const id = req.params.id;
-
-      const result = await productCollection.deleteOne({ _id: ObjectId(id) });
-
-      if (!result.deletedCount) {
-        return res.send({ success: false, error: "something went wrong" });
-      }
-
-      res.send({ success: true, message: "Successfully deleted " });
+    //post API---------
+    app.post("/products/:id", async (req, res) => {
+      const product = req.body;
+      const result = await orderCollection.insertOne(product);
+      console.log(result);
+      res.send({
+        success: true,
+        message: `Successfully inserted ${product.name}!`,
+      });
     });
+
+
+
+    // app.delete("/products/:id", async (req, res) => {
+    //   const id = req.params.id;
+
+    //   const result = await productCollection.deleteOne({ _id: ObjectId(id) });
+
+    //   if (!result.deletedCount) {
+    //     return res.send({ success: false, error: "something went wrong" });
+    //   }
+
+    //   res.send({ success: true, message: "Successfully deleted " });
+    // });
     
   } finally {
   }
