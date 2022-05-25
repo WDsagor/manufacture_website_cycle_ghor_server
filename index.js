@@ -52,28 +52,7 @@ async function run() {
 
       res.send({ success: true, message: "Successfully deleted " });
     });
-    app.post("/inventory", async (req, res) => {
-      const items = req.body;
-      const result = await itemCollection.insertOne(items);
-
-      res.send({
-        success: true,
-        message: `Successfully inserted ${items.name}!`,
-      });
-    });
-    app.put("/inventory", async (req, res) => {
-      const items = req.body;
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      console.log(items);
-      // const result = await itemCollection.updateOne(query, items);
-      
-
-      res.send({
-        success: true,
-        message: `Successfully Update ${items.name}!`,
-      });
-    });
+    
   } finally {
   }
 }
