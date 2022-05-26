@@ -36,6 +36,12 @@ async function run() {
       const products = await cursor.toArray();
       res.send(products);
     });
+    app.get("/orders", async (req, res) => {
+      const query = {};
+      const cursor = orderCollection.find(query);
+      const products = await cursor.toArray();
+      res.send(products);
+    });
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -49,23 +55,21 @@ async function run() {
       console.log(result);
       res.send({
         success: true,
-        message: `Successfully inserted ${product.name}!`,
+        message: `Successfully Ordered ${product.itemName}!`,
       });
     });
 
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
 
+      const result = await orderCollection.deleteOne({ _id: ObjectId(id) });
 
-    // app.delete("/products/:id", async (req, res) => {
-    //   const id = req.params.id;
+      if (!result.deletedCount) {
+        return res.send({ success: false, error: "something went wrong" });
+      }
 
-    //   const result = await productCollection.deleteOne({ _id: ObjectId(id) });
-
-    //   if (!result.deletedCount) {
-    //     return res.send({ success: false, error: "something went wrong" });
-    //   }
-
-    //   res.send({ success: true, message: "Successfully deleted " });
-    // });
+      res.send({ success: true, message: "Successfully deleted " });
+    });
     
   } finally {
   }
