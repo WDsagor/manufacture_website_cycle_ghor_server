@@ -111,6 +111,14 @@ async function run() {
       );
       res.send({ result, accessToken });
     });
+    app.post("/add-product", async (req, res) => {
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send({
+        success: true,
+        message: `Successfully added ${product.name}!`,
+      });
+    });
 
     app.put("/user/admin/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
