@@ -3,6 +3,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -119,6 +121,39 @@ async function run() {
         message: `Successfully added ${product.name}!`,
       });
     });
+    
+    app.post('/create-payment-intent', verifyToken, async(req, res) =>{
+      const products = req.body;
+      const price = products.price;
+      // console.log(price);
+      const amount = price*100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency: 'usd',
+        payment_method_types:['card']
+      });
+      res.send({clientSecret: paymentIntent.client_secret})
+    });
+
+    app.patch("/products/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const product = req.body;
+      const filter = { _id: ObjectId(id) };
+      const transactionId = {
+        $set:{
+          transactionId: product.transactionId
+        }
+      }
+      const result = await orderCollection.updateOne(filter, transactionId);
+      
+      res.send({
+        success: true,
+        message: `Payment Successfully `,
+      });
+    });
+
+
+
 
     app.put("/user/admin/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
