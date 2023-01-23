@@ -3,7 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -39,7 +39,7 @@ const verifyToken = (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    client.connect();
     const productCollection = client.db("cycle_ghor").collection("products");
     const orderCollection = client.db("cycle_ghor").collection("orders");
     const userCollection = client.db("cycle_ghor").collection("users");
@@ -77,17 +77,17 @@ async function run() {
       const allUser = await userCollection.find(query).toArray();
       res.send(allUser);
     });
-    app.get('/admin/:email', verifyToken, async(req, res) =>{
-      const email =req.params.email;
-      const user = await userCollection.findOne({email: email});
-      const isAdmin = user.role === 'admin';
-      res.send({admin: isAdmin})
-    })
+    app.get("/admin/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user.role === "admin";
+      res.send({ admin: isAdmin });
+    });
     //post API---------
     app.post("/products/:id", async (req, res) => {
       const product = req.body;
       const result = await orderCollection.insertOne(product);
-      
+
       res.send({
         success: true,
         message: `Successfully Ordered ${product.itemName}!`,
@@ -121,18 +121,18 @@ async function run() {
         message: `Successfully added ${product.name}!`,
       });
     });
-    
-    app.post('/create-payment-intent', verifyToken, async(req, res) =>{
+
+    app.post("/create-payment-intent", verifyToken, async (req, res) => {
       const products = req.body;
       const price = products.price;
       // console.log(price);
-      const amount = price*100;
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
-        amount : amount,
-        currency: 'usd',
-        payment_method_types:['card']
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
       });
-      res.send({clientSecret: paymentIntent.client_secret})
+      res.send({ clientSecret: paymentIntent.client_secret });
     });
 
     app.patch("/products/:id", verifyToken, async (req, res) => {
@@ -140,27 +140,25 @@ async function run() {
       const product = req.body;
       const filter = { _id: ObjectId(id) };
       const transactionId = {
-        $set:{
-          transactionId: product.transactionId
-        }
-      }
+        $set: {
+          transactionId: product.transactionId,
+        },
+      };
       const result = await orderCollection.updateOne(filter, transactionId);
-      
+
       res.send({
         success: true,
         message: `Payment Successfully `,
       });
     });
 
-
-
-
-    app.put("/user/admin/:email",verifyToken, async (req, res) => {
+    app.put("/user/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const requester = req.decoded.email;
-      const requesterAccount = await userCollection.findOne({email:requester});
-      if(requesterAccount.role === 'admin'){
-
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAccount.role === "admin") {
         const filter = { email: email };
         const updateUser = {
           $set: { role: "admin" },
