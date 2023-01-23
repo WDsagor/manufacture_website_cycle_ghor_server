@@ -39,7 +39,7 @@ const verifyToken = (req, res, next) => {
 
 async function run() {
   try {
-    client.connect();
+    await client.connect();
     const productCollection = client.db("cycle_ghor").collection("products");
     const orderCollection = client.db("cycle_ghor").collection("orders");
     const userCollection = client.db("cycle_ghor").collection("users");
